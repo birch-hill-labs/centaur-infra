@@ -32,9 +32,11 @@ Argo CD then installs the Centaur Helm chart and mounts the ACME overlay image.
 
 Edit `clusters/acme-centaur/argocd/bootstrap/centaur.yaml` and replace:
 
-- `CHART_GIT_REVISION`
 - `sha-0000000` image tags
 - `ghcr.io/paradigmxyz/*` image repositories if you mirror images elsewhere
+
+The template tracks the Centaur chart from `main` by default. Pin
+`targetRevision` to a commit SHA for production.
 
 ## Configure secrets
 

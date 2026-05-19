@@ -14,7 +14,7 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/paradigmxyz/centaur.git
-      targetRevision: CHART_GIT_REVISION
+      targetRevision: main
       path: contrib/chart
       helm:
         valueFiles:

@@ -27,7 +27,7 @@ sandbox:
     repository: ghcr.io/paradigmxyz/centaur-agent
     tag: sha-0000000
     pullPolicy: IfNotPresent
-  runtimeClassName: gvisor
+  runtimeClassName: ""
 
 slackbot:
   enabled: true
