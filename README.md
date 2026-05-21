@@ -1,12 +1,55 @@
-# centaur-acme-infra
+<img width="1500" height="500" alt="Centaur banner" src="https://github.com/user-attachments/assets/cc85cdb1-5a72-4eb2-ba1b-2e0a8fbbf691" />
 
-Forkable GitOps template for deploying Centaur with the `centaur-acme` example
-overlay.
+<h4 align="center">
+    Forkable GitOps template for deploying Centaur with an organization overlay.
+</h4>
 
-This repo is intentionally public-consumption safe: no private domains, no
-fixed IP addresses, no personal data, and no real secrets. It mirrors the shape
-of a production Argo CD deployment while leaving environment-specific values as
+<p align="center">
+  Bring the Centaur chart, your overlay image, and cluster-specific values
+  together through Argo CD.
+</p>
+
+<p align="center">
+  <a href="#use-this-template">Use This Template</a> •
+  <a href="#repositories">Repositories</a> •
+  <a href="#bootstrap">Bootstrap</a> •
+  <a href="#configure-images">Configure Images</a> •
+  <a href="#configure-secrets">Configure Secrets</a>
+</p>
+
+## Overview
+
+`centaur-acme-infra` is the companion GitOps template for deploying
+[Centaur](https://github.com/paradigmxyz/centaur) with an organization overlay
+such as [`centaur-acme`](https://github.com/paradigmxyz/centaur-acme).
+
+It is intentionally public-consumption safe: no private domains, no fixed IP
+addresses, no personal data, and no real secrets. It mirrors the shape of a
+production Argo CD deployment while leaving environment-specific values as
 placeholders.
+
+```text
+centaur-acme-infra
+    |
+    +-- Argo CD application
+    +-- Helm values
+    +-- optional raw manifests
+    |
+    v
+Centaur in your Kubernetes cluster
+```
+
+## Use This Template
+
+1. Click **Use this template** in GitHub, or fork the repo if you want to keep a
+   visible upstream relationship.
+2. Rename `clusters/acme-centaur` if your environment uses a different cluster
+   or app name.
+3. Replace `paradigmxyz` repositories and `ghcr.io/paradigmxyz/*` images with
+   your organization-owned repositories or mirrors.
+4. Create the required `centaur-infra-env` Kubernetes Secret in the target
+   namespace.
+5. Apply the bootstrap manifests and let Argo CD reconcile Centaur.
 
 ## Repositories
 
