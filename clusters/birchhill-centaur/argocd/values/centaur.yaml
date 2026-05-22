@@ -1,0 +1,94 @@
+global:
+  imagePullSecrets: []
+
+secretManager:
+  backend: onepassword
+  existingSecretName: centaur-infra-env
+  envPrefix: ""
+
+api:
+  image:
+    repository: ghcr.io/birch-hill-labs/centaur-api
+    tag: sha-0000000
+    pullPolicy: IfNotPresent
+  executionWorkerEnabled: true
+  workflowWorkerEnabled: true
+  warmPoolEnabled: true
+  runtimeCredentialGuardEnabled: true
+  egressDiscovery:
+    enabled: false
+
+# Overlay disabled for v1; bootstrap manifest also sets repository="" to make it explicit.
+overlay:
+  image:
+    repository: ""
+    tag: ""
+    pullPolicy: IfNotPresent
+    sourcePath: /overlay
+
+sandbox:
+  image:
+    repository: ghcr.io/birch-hill-labs/centaur-agent
+    tag: sha-0000000
+    pullPolicy: IfNotPresent
+  runtimeClassName: ""
+
+slackbot:
+  enabled: true
+  image:
+    repository: ghcr.io/birch-hill-labs/centaur-slackbot
+    tag: sha-0000000
+    pullPolicy: IfNotPresent
+
+ironProxy:
+  image:
+    repository: ghcr.io/birch-hill-labs/centaur-iron-proxy
+    tag: sha-0000000
+    pullPolicy: IfNotPresent
+  # Production uses 1Password Connect (in-cluster Connect server, no SA rate limits).
+  secretSource: onepassword-connect
+  secretTtl: 10m
+  manager:
+    secretSource: onepassword-connect
+
+# Deploy the in-cluster 1Password Connect server. Credentials secret
+# (centaur-onepassword-connect-credentials) is created out-of-band from
+# 1password-credentials.json before this chart installs.
+onepasswordConnect:
+  connect:
+    create: true
+    credentialsName: centaur-onepassword-connect-credentials
+    credentialsKey: 1password-credentials.json
+
+postgres:
+  enabled: true
+  auth:
+    existingSecretName: centaur-infra-env
+    existingSecretKey: POSTGRES_PASSWORD
+  persistence:
+    enabled: true
+    size: 20Gi
+    # DOKS default StorageClass — provisions DO Block Storage volumes.
+    storageClassName: do-block-storage
+
+# Public HTTPS ingress for the slackbot (Slack event URL terminates here).
+# cert-manager + ingress-nginx are installed as platform services (separate from this chart).
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "5m"
+  hosts:
+    - host: centaur.birchhill.io
+      paths:
+        - path: /api/slack/events
+          pathType: Prefix
+          service: slackbot
+  tls:
+    - hosts:
+        - centaur.birchhill.io
+      secretName: centaur-birchhill-io-tls
+
+networkPolicy:
+  enabled: true

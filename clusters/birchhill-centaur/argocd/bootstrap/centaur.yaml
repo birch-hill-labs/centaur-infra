@@ -3,29 +3,30 @@ kind: Application
 metadata:
   name: centaur
   namespace: argocd
-  annotations:
-    argocd-image-updater.argoproj.io/image-list: overlay=ghcr.io/paradigmxyz/centaur-acme
-    argocd-image-updater.argoproj.io/write-back-method: argocd
-    argocd-image-updater.argoproj.io/overlay.helm.image-name: overlay.image.repository
-    argocd-image-updater.argoproj.io/overlay.helm.image-tag: overlay.image.tag
-    argocd-image-updater.argoproj.io/overlay.update-strategy: newest-build
-    argocd-image-updater.argoproj.io/overlay.allow-tags: regexp:^sha-[0-9a-f]{7}$
+  # Image-updater annotations omitted until we publish a Birch Hill overlay image.
+  # Re-add once ghcr.io/birch-hill-labs/centaur-overlay exists (see phase 2 plan).
 spec:
   project: default
   sources:
+    # 1. Centaur Helm chart — pinned to the same upstream commit we validated locally (PONG smoke).
     - repoURL: https://github.com/paradigmxyz/centaur.git
-      targetRevision: main
+      targetRevision: c52918e00c8e2861252d84c97b69ad2f87b8709a
       path: contrib/chart
       helm:
         valueFiles:
-          - $values/clusters/acme-centaur/argocd/values/centaur.yaml
+          - $values/clusters/birchhill-centaur/argocd/values/centaur.yaml
         parameters:
+          # Overlay disabled for v1 — we'll wire in birch-hill-labs/centaur-overlay
+          # once it's forked + image published. Empty repository tells the chart
+          # to skip mounting an overlay.
           - name: overlay.image.repository
-            value: ghcr.io/paradigmxyz/centaur-acme
+            value: ""
             forceString: true
           - name: overlay.image.tag
-            value: sha-0000000
+            value: ""
             forceString: true
+          # Base Centaur image tags — replace these with the SHA-tagged images we
+          # build + push to ghcr.io/birch-hill-labs/* (see push-images workflow).
           - name: api.image.tag
             value: sha-0000000
             forceString: true
@@ -38,12 +39,14 @@ spec:
           - name: ironProxy.image.tag
             value: sha-0000000
             forceString: true
-    - repoURL: https://github.com/paradigmxyz/centaur-acme-infra.git
+    # 2. Values file (this repo's fork).
+    - repoURL: https://github.com/birch-hill-labs/centaur-infra.git
       targetRevision: main
       ref: values
-    - repoURL: https://github.com/paradigmxyz/centaur-acme-infra.git
+    # 3. Optional raw manifests (this repo's fork).
+    - repoURL: https://github.com/birch-hill-labs/centaur-infra.git
       targetRevision: main
-      path: clusters/acme-centaur/argocd/apps/centaur
+      path: clusters/birchhill-centaur/argocd/apps/centaur
   destination:
     namespace: centaur-system
     server: https://kubernetes.default.svc
