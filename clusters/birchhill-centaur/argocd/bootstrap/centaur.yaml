@@ -17,7 +17,7 @@ spec:
     #     credential-fetch timeouts surfacing as cryptic 401s
     # Will return to paradigmxyz upstream as each patch is accepted there.
     - repoURL: https://github.com/birch-hill-labs/centaur.git
-      targetRevision: 7ab4bded
+      targetRevision: d8c3c0f5
       path: contrib/chart
       helm:
         valueFiles:
@@ -35,7 +35,7 @@ spec:
           # Base Centaur image tags — replace these with the SHA-tagged images we
           # build + push to ghcr.io/birch-hill-labs/* (see push-images workflow).
           - name: api.image.tag
-            value: sha-7ab4bde
+            value: sha-d8c3c0f
             forceString: true
           - name: slackbot.image.tag
             value: sha-c52918e
