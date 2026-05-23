@@ -69,23 +69,24 @@ postgres:
   persistence:
     enabled: true
     size: 20Gi
-    # DOKS default StorageClass — provisions DO Block Storage volumes.
+    # DOKS default StorageClass — provisions DO Block Storage volumes (ext4).
     storageClassName: do-block-storage
+    # Mount the PVC at /var/lib/postgresql/data/data instead of /var/lib/postgresql/data
+    # so Postgres initdb doesn't trip over ext4's lost+found dir. Requires the
+    # postgres.persistence.subPath knob added in birch-hill-labs/centaur PR #1.
+    subPath: data
 
 # Public HTTPS ingress for the slackbot (Slack event URL terminates here).
 # cert-manager + ingress-nginx are installed as platform services (separate from this chart).
+# Chart's ingress template takes a single host string (not a hosts list) and hardcodes
+# path "/" to the slackbot service on port 3001.
 ingress:
   enabled: true
   className: nginx
+  host: centaur.birchhill.io
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: "5m"
-  hosts:
-    - host: centaur.birchhill.io
-      paths:
-        - path: /api/slack/events
-          pathType: Prefix
-          service: slackbot
   tls:
     - hosts:
         - centaur.birchhill.io
