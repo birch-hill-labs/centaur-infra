@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: centaur
+  namespace: argocd
+  # Image-updater annotations omitted until we publish a Birch Hill overlay image.
+  # Re-add once ghcr.io/birch-hill-labs/centaur-overlay exists (see phase 2 plan).
+spec:
+  project: default
+  sources:
+    # 1. Centaur Helm chart — pinned to the same upstream commit we validated locally (PONG smoke).
+    - repoURL: https://github.com/paradigmxyz/centaur.git
+      targetRevision: c52918e00c8e2861252d84c97b69ad2f87b8709a
+      path: contrib/chart
+      helm:
+        valueFiles:
+          - $values/clusters/birchhill-centaur/argocd/values/centaur.yaml
+        parameters:
+          # Overlay disabled for v1 — we'll wire in birch-hill-labs/centaur-overlay
+          # once it's forked + image published. Empty repository tells the chart
+          # to skip mounting an overlay.
+          - name: overlay.image.repository
+            value: ""
+            forceString: true
+          - name: overlay.image.tag
+            value: ""
+            forceString: true
+          # Base Centaur image tags — replace these with the SHA-tagged images we
+          # build + push to ghcr.io/birch-hill-labs/* (see push-images workflow).
+          - name: api.image.tag
+            value: sha-c52918e
+            forceString: true
+          - name: slackbot.image.tag
+            value: sha-c52918e
+            forceString: true
+          - name: sandbox.image.tag
+            value: sha-c52918e
+            forceString: true
+          - name: ironProxy.image.tag
+            value: sha-c52918e
+            forceString: true
+    # 2. Values file (this repo's fork).
+    - repoURL: https://github.com/birch-hill-labs/centaur-infra.git
+      targetRevision: main
+      ref: values
+    # 3. Optional raw manifests (this repo's fork).
+    - repoURL: https://github.com/birch-hill-labs/centaur-infra.git
+      targetRevision: main
+      path: clusters/birchhill-centaur/argocd/apps/centaur
+  destination:
+    namespace: centaur-system
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    managedNamespaceMetadata:
+      labels:
+        pod-security.kubernetes.io/enforce: privileged
+        pod-security.kubernetes.io/audit: baseline
+        pod-security.kubernetes.io/warn: baseline
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+    automated:
+      prune: true
+      selfHeal: true
