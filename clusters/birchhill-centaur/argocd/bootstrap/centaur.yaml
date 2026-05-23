@@ -9,11 +9,15 @@ spec:
   project: default
   sources:
     # 1. Centaur Helm chart — pinned to the same upstream commit we validated locally (PONG smoke).
-    # Pinned to birch-hill-labs/centaur fork which carries the postgres subPath
-    # patch (PR #1 in our fork). Will return to paradigmxyz upstream once the
-    # patch is accepted there.
+    # Pinned to birch-hill-labs/centaur fork which carries three Birch Hill patches:
+    #   - postgres.persistence.subPath (PR #1) — fixes lost+found on ext4 PVCs
+    #   - default harness → claude-code (PR #2) — so unmarked Slack mentions
+    #     don't hit the unfunded OpenAI path
+    #   - iron-proxy NetworkPolicy egress to onepassword-connect (PR #2) — fixes
+    #     credential-fetch timeouts surfacing as cryptic 401s
+    # Will return to paradigmxyz upstream as each patch is accepted there.
     - repoURL: https://github.com/birch-hill-labs/centaur.git
-      targetRevision: 8f82496f
+      targetRevision: 7ab4bded
       path: contrib/chart
       helm:
         valueFiles:
@@ -31,7 +35,7 @@ spec:
           # Base Centaur image tags — replace these with the SHA-tagged images we
           # build + push to ghcr.io/birch-hill-labs/* (see push-images workflow).
           - name: api.image.tag
-            value: sha-c52918e
+            value: sha-7ab4bde
             forceString: true
           - name: slackbot.image.tag
             value: sha-c52918e
