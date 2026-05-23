@@ -1,5 +1,6 @@
 global:
-  imagePullSecrets: []
+  imagePullSecrets:
+    - name: ghcr-pull-secret
 
 secretManager:
   backend: onepassword
@@ -9,7 +10,7 @@ secretManager:
 api:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-api
-    tag: sha-0000000
+    tag: sha-c52918e
     pullPolicy: IfNotPresent
   executionWorkerEnabled: true
   workflowWorkerEnabled: true
@@ -29,7 +30,7 @@ overlay:
 sandbox:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-agent
-    tag: sha-0000000
+    tag: sha-c52918e
     pullPolicy: IfNotPresent
   runtimeClassName: ""
 
@@ -37,13 +38,13 @@ slackbot:
   enabled: true
   image:
     repository: ghcr.io/birch-hill-labs/centaur-slackbot
-    tag: sha-0000000
+    tag: sha-c52918e
     pullPolicy: IfNotPresent
 
 ironProxy:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-iron-proxy
-    tag: sha-0000000
+    tag: sha-c52918e
     pullPolicy: IfNotPresent
   # Production uses 1Password Connect (in-cluster Connect server, no SA rate limits).
   secretSource: onepassword-connect

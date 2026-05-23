@@ -28,16 +28,16 @@ spec:
           # Base Centaur image tags — replace these with the SHA-tagged images we
           # build + push to ghcr.io/birch-hill-labs/* (see push-images workflow).
           - name: api.image.tag
-            value: sha-0000000
+            value: sha-c52918e
             forceString: true
           - name: slackbot.image.tag
-            value: sha-0000000
+            value: sha-c52918e
             forceString: true
           - name: sandbox.image.tag
-            value: sha-0000000
+            value: sha-c52918e
             forceString: true
           - name: ironProxy.image.tag
-            value: sha-0000000
+            value: sha-c52918e
             forceString: true
     # 2. Values file (this repo's fork).
     - repoURL: https://github.com/birch-hill-labs/centaur-infra.git
