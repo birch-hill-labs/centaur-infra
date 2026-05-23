@@ -99,3 +99,12 @@ ingress:
 
 networkPolicy:
   enabled: true
+  # Allow our ingress controller (deployed in the `ingress-nginx` namespace via
+  # the ingress-nginx helm chart) to reach the slackbot and api pods. The chart
+  # default only allows `kube-system`, which is where Docker Desktop / kind put
+  # their bundled ingresses but NOT where the standard ingress-nginx chart
+  # installs. Without this, NetworkPolicy drops nginx→pod traffic and every
+  # request 504s, including Let's Encrypt's HTTP-01 challenge.
+  ingressControllerNamespaces:
+    - kube-system
+    - ingress-nginx
