@@ -10,7 +10,7 @@ secretManager:
 api:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-api
-    tag: sha-7ab4bde
+    tag: sha-d8c3c0f
     pullPolicy: IfNotPresent
   executionWorkerEnabled: true
   workflowWorkerEnabled: true
