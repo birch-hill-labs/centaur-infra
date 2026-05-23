@@ -9,8 +9,11 @@ spec:
   project: default
   sources:
     # 1. Centaur Helm chart — pinned to the same upstream commit we validated locally (PONG smoke).
-    - repoURL: https://github.com/paradigmxyz/centaur.git
-      targetRevision: c52918e00c8e2861252d84c97b69ad2f87b8709a
+    # Pinned to birch-hill-labs/centaur fork which carries the postgres subPath
+    # patch (PR #1 in our fork). Will return to paradigmxyz upstream once the
+    # patch is accepted there.
+    - repoURL: https://github.com/birch-hill-labs/centaur.git
+      targetRevision: 8f82496f
       path: contrib/chart
       helm:
         valueFiles:
