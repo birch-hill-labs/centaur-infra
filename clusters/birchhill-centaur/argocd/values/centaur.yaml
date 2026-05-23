@@ -87,6 +87,11 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: "5m"
+    # nginx-ingress applies HTTP→HTTPS redirect per host when any ingress for
+    # that host has TLS. That breaks Let's Encrypt's HTTP-01 challenge GET. Slack
+    # only ever calls the HTTPS URL anyway, so we lose nothing by disabling the
+    # redirect here.
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
   tls:
     - hosts:
         - centaur.birchhill.io
