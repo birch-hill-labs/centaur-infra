@@ -19,11 +19,14 @@ api:
   egressDiscovery:
     enabled: false
 
-# Overlay disabled for v1; bootstrap manifest also sets repository="" to make it explicit.
+# Birch Hill overlay carrying the obsidian_vault tool + birch-hill-vault skill +
+# BH-specific system prompt. Bootstrap manifest also sets these via helm
+# parameters; values here are the fallback and what someone reading the chart
+# render sees by default.
 overlay:
   image:
-    repository: ""
-    tag: ""
+    repository: ghcr.io/birch-hill-labs/centaur-overlay
+    tag: sha-d6c0273
     pullPolicy: IfNotPresent
     sourcePath: /overlay
 

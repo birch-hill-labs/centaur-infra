@@ -23,14 +23,15 @@ spec:
         valueFiles:
           - $values/clusters/birchhill-centaur/argocd/values/centaur.yaml
         parameters:
-          # Overlay disabled for v1 — we'll wire in birch-hill-labs/centaur-overlay
-          # once it's forked + image published. Empty repository tells the chart
-          # to skip mounting an overlay.
+          # Birch Hill overlay: obsidian_vault tool + birch-hill-vault skill +
+          # BH-specific system prompt. Image lives at
+          # ghcr.io/birch-hill-labs/centaur-overlay (private), built from
+          # birch-hill-labs/centaur-overlay at the SHA below.
           - name: overlay.image.repository
-            value: ""
+            value: ghcr.io/birch-hill-labs/centaur-overlay
             forceString: true
           - name: overlay.image.tag
-            value: ""
+            value: sha-d6c0273
             forceString: true
           # Base Centaur image tags — replace these with the SHA-tagged images we
           # build + push to ghcr.io/birch-hill-labs/* (see push-images workflow).
