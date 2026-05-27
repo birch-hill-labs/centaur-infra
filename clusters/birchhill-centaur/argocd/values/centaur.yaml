@@ -26,7 +26,7 @@ api:
 overlay:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-overlay
-    tag: sha-d6c0273
+    tag: sha-d907651
     pullPolicy: IfNotPresent
     sourcePath: /overlay
 
