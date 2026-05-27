@@ -42,8 +42,13 @@ sandbox:
   # ~3-5x the rate budget on the same tier, is ~3x cheaper per token, and is
   # plenty smart for Slack-mention work. Override on a per-turn basis if a
   # specific question genuinely needs Opus.
+  #
+  # The wrapper reads CLAUDE_MODEL (see services/sandbox/claude-app-wrapper.py
+  # in the centaur fork) — NOT the Anthropic SDK's ANTHROPIC_MODEL — and
+  # passes it verbatim to `claude --model`. Accepts aliases ("sonnet", "opus",
+  # "haiku") or full IDs like "claude-sonnet-4-6".
   extraEnv:
-    ANTHROPIC_MODEL: claude-sonnet-4-6
+    CLAUDE_MODEL: claude-sonnet-4-6
 
 slackbot:
   enabled: true
