@@ -8,16 +8,13 @@ metadata:
 spec:
   project: default
   sources:
-    # 1. Centaur Helm chart — pinned to the same upstream commit we validated locally (PONG smoke).
-    # Pinned to birch-hill-labs/centaur fork which carries three Birch Hill patches:
-    #   - postgres.persistence.subPath (PR #1) — fixes lost+found on ext4 PVCs
-    #   - default harness → claude-code (PR #2) — so unmarked Slack mentions
-    #     don't hit the unfunded OpenAI path
-    #   - iron-proxy NetworkPolicy egress to onepassword-connect (PR #2) — fixes
-    #     credential-fetch timeouts surfacing as cryptic 401s
-    # Will return to paradigmxyz upstream as each patch is accepted there.
+    # 1. Centaur Helm chart — pinned to a specific birch-hill-labs/centaur commit.
+    # Synced to paradigmxyz/centaur@main 2026-05-27 (upstream PRs #163, #164, #170
+    # superseded our prior 3 carried patches). The fork now carries only a small
+    # CI workflow patch (see .github/workflows/publish-images.yml — IMAGE_NAMESPACE
+    # pointed at our GHCR instead of upstream's).
     - repoURL: https://github.com/birch-hill-labs/centaur.git
-      targetRevision: d8c3c0f5
+      targetRevision: ac06cff5
       path: contrib/chart
       helm:
         valueFiles:
@@ -33,19 +30,21 @@ spec:
           - name: overlay.image.tag
             value: sha-d907651
             forceString: true
-          # Base Centaur image tags — replace these with the SHA-tagged images we
-          # build + push to ghcr.io/birch-hill-labs/* (see push-images workflow).
+          # Base Centaur image tags. CI publishes ghcr.io/birch-hill-labs/centaur-*
+          # at sha-<7> on every push to main (see .github/workflows/publish-images.yml
+          # on the fork). All 4 tags below match the same fork commit referenced by
+          # targetRevision above; bump together on every fork sync.
           - name: api.image.tag
-            value: sha-d8c3c0f
+            value: sha-ac06cff
             forceString: true
           - name: slackbot.image.tag
-            value: sha-c52918e
+            value: sha-ac06cff
             forceString: true
           - name: sandbox.image.tag
-            value: sha-c52918e
+            value: sha-ac06cff
             forceString: true
           - name: ironProxy.image.tag
-            value: sha-c52918e
+            value: sha-ac06cff
             forceString: true
     # 2. Values file (this repo's fork).
     - repoURL: https://github.com/birch-hill-labs/centaur-infra.git

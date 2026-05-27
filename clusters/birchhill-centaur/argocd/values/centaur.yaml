@@ -10,8 +10,13 @@ secretManager:
 api:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-api
-    tag: sha-d8c3c0f
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
+  # Pinned to claude-code (was upstream-default codex). Templated by the chart
+  # into CENTAUR_DEFAULT_HARNESS=claude-code on the api container; resolved by
+  # services/api/api/harness_config.py. Upstream PR #170 added this knob;
+  # before that we carried a 3-commit fork patch to flip the default.
+  defaultHarness: claude-code
   executionWorkerEnabled: true
   workflowWorkerEnabled: true
   warmPoolEnabled: true
@@ -33,7 +38,7 @@ overlay:
 sandbox:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-agent
-    tag: sha-c52918e
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
   runtimeClassName: ""
   # Pin Claude Code to Sonnet 4.6 instead of letting it default to Opus 4.7.
@@ -54,13 +59,13 @@ slackbot:
   enabled: true
   image:
     repository: ghcr.io/birch-hill-labs/centaur-slackbot
-    tag: sha-c52918e
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
 
 ironProxy:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-iron-proxy
-    tag: sha-c52918e
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
   # Production uses 1Password Connect (in-cluster Connect server, no SA rate limits).
   secretSource: onepassword-connect
@@ -88,8 +93,8 @@ postgres:
     # DOKS default StorageClass — provisions DO Block Storage volumes (ext4).
     storageClassName: do-block-storage
     # Mount the PVC at /var/lib/postgresql/data/data instead of /var/lib/postgresql/data
-    # so Postgres initdb doesn't trip over ext4's lost+found dir. Requires the
-    # postgres.persistence.subPath knob added in birch-hill-labs/centaur PR #1.
+    # so Postgres initdb doesn't trip over ext4's lost+found dir. The subPath
+    # chart knob landed upstream as paradigmxyz/centaur#163.
     subPath: data
 
 # Public HTTPS ingress for the slackbot (Slack event URL terminates here).
