@@ -23,6 +23,13 @@ api:
   runtimeCredentialGuardEnabled: true
   egressDiscovery:
     enabled: false
+  # Warm-pool spawn code reads a SEPARATE env var from the default harness
+  # resolver — see services/api/api/warm_pool.py:30 (`POOL_HARNESS = os.getenv
+  # ("WARM_POOL_HARNESS", "codex")`). Without this, the warm pool keeps
+  # spawning codex sandboxes (which then fail silently because our OpenAI key
+  # is over quota) even though api.defaultHarness above is claude-code.
+  extraEnv:
+    WARM_POOL_HARNESS: claude-code
 
 # Birch Hill overlay carrying the obsidian_vault tool + birch-hill-vault skill +
 # BH-specific system prompt. Bootstrap manifest also sets these via helm
