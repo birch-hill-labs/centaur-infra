@@ -10,7 +10,7 @@ secretManager:
 api:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-api
-    tag: sha-42ed4ea
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
   # Pinned to claude-code (was upstream-default codex). Templated by the chart
   # into CENTAUR_DEFAULT_HARNESS=claude-code on the api container; resolved by
@@ -49,7 +49,7 @@ overlay:
 sandbox:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-agent
-    tag: sha-42ed4ea
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
   runtimeClassName: ""
   # Pin Claude Code to Sonnet 4.6 instead of letting it default to Opus 4.7.
@@ -70,13 +70,13 @@ slackbot:
   enabled: true
   image:
     repository: ghcr.io/birch-hill-labs/centaur-slackbot
-    tag: sha-42ed4ea
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
 
 ironProxy:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-iron-proxy
-    tag: sha-42ed4ea
+    tag: sha-ac06cff
     pullPolicy: IfNotPresent
   # Production uses 1Password Connect (in-cluster Connect server, no SA rate limits).
   secretSource: onepassword-connect

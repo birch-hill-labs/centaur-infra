@@ -14,7 +14,7 @@ spec:
     # CI workflow patch (see .github/workflows/publish-images.yml — IMAGE_NAMESPACE
     # pointed at our GHCR instead of upstream's).
     - repoURL: https://github.com/birch-hill-labs/centaur.git
-      targetRevision: 42ed4ea01408b80f39b766f2952532846eb4aa5b
+      targetRevision: ac06cff5a5f19e55867d8b8c095be12849c9a122
       path: contrib/chart
       helm:
         valueFiles:
@@ -35,16 +35,16 @@ spec:
           # on the fork). All 4 tags below match the same fork commit referenced by
           # targetRevision above; bump together on every fork sync.
           - name: api.image.tag
-            value: sha-42ed4ea
+            value: sha-ac06cff
             forceString: true
           - name: slackbot.image.tag
-            value: sha-42ed4ea
+            value: sha-ac06cff
             forceString: true
           - name: sandbox.image.tag
-            value: sha-42ed4ea
+            value: sha-ac06cff
             forceString: true
           - name: ironProxy.image.tag
-            value: sha-42ed4ea
+            value: sha-ac06cff
             forceString: true
     # 2. Values file (this repo's fork).
     - repoURL: https://github.com/birch-hill-labs/centaur-infra.git
