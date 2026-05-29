@@ -30,10 +30,6 @@ api:
   # is over quota) even though api.defaultHarness above is claude-code.
   extraEnv:
     WARM_POOL_HARNESS: claude-code
-    # Birch Hill's research-service Supabase project. Read by the
-    # bh_supabase tool at call time to build PostgREST URLs. Anon key
-    # comes from 1P vault via iron-proxy at request time.
-    BH_SUPABASE_URL: https://oajvdqbaxurehrfwvrpe.supabase.co
 
 # Birch Hill overlay carrying the obsidian_vault tool + birch-hill-vault skill +
 # BH-specific system prompt. Bootstrap manifest also sets these via helm
@@ -42,7 +38,7 @@ api:
 overlay:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-overlay
-    tag: sha-d6dc363
+    tag: sha-3cc53da
     pullPolicy: IfNotPresent
     sourcePath: /overlay
 
