@@ -28,7 +28,7 @@ spec:
             value: ghcr.io/birch-hill-labs/centaur-overlay
             forceString: true
           - name: overlay.image.tag
-            value: sha-a9c405f
+            value: sha-d6dc363
             forceString: true
           # Base Centaur image tags. CI publishes ghcr.io/birch-hill-labs/centaur-*
           # at sha-<7> on every push to main (see .github/workflows/publish-images.yml
