@@ -7,72 +7,91 @@ secretManager:
   existingSecretName: centaur-infra-env
   envPrefix: ""
 
-api:
+# ── api-rs (Rust session control plane, replaces the Python `api`) ───────────
+# Was `api:` pre-2026-06-16. The Rust rewrite (services/api-rs) renamed the
+# top-level values key and moved several knobs:
+#   - default-harness selection lives at `sandbox.harnessEngine` now (single
+#     source of truth — drives SESSION_SANDBOX_HARNESS env on apiRs, replaces
+#     the old `api.defaultHarness` + `WARM_POOL_HARNESS` env pair)
+#   - warm-pool tuning is here as `sandboxWarmPoolSize` etc. (was Python-side)
+#   - `runMigrations: true` — apiRs runs DB migrations on startup
+apiRs:
+  enabled: true
   image:
-    repository: ghcr.io/birch-hill-labs/centaur-api
-    tag: sha-ac06cff
+    repository: ghcr.io/birch-hill-labs/centaur-api-rs
+    tag: sha-97dae99
     pullPolicy: IfNotPresent
-  # Pinned to claude-code (was upstream-default codex). Templated by the chart
-  # into CENTAUR_DEFAULT_HARNESS=claude-code on the api container; resolved by
-  # services/api/api/harness_config.py. Upstream PR #170 added this knob;
-  # before that we carried a 3-commit fork patch to flip the default.
-  defaultHarness: claude-code
-  executionWorkerEnabled: true
-  workflowWorkerEnabled: true
-  warmPoolEnabled: true
-  runtimeCredentialGuardEnabled: true
-  egressDiscovery:
-    enabled: false
-  # Warm-pool spawn code reads a SEPARATE env var from the default harness
-  # resolver — see services/api/api/warm_pool.py:30 (`POOL_HARNESS = os.getenv
-  # ("WARM_POOL_HARNESS", "codex")`). Without this, the warm pool keeps
-  # spawning codex sandboxes (which then fail silently because our OpenAI key
-  # is over quota) even though api.defaultHarness above is claude-code.
-  extraEnv:
-    WARM_POOL_HARNESS: claude-code
+  sandboxBackend: agent-k8s    # uses agents.x-k8s.io Sandbox CRD
+  sandboxWarmPoolSize: 3
+  sandboxIdleStopTtlSecs: 10800
+  sandboxMaxLifetimeSecs: 259200
+  extraEnv: {}
 
-# Birch Hill overlay carrying the obsidian_vault tool + birch-hill-vault skill +
-# BH-specific system prompt. Bootstrap manifest also sets these via helm
-# parameters; values here are the fallback and what someone reading the chart
-# render sees by default.
-overlay:
-  image:
-    repository: ghcr.io/birch-hill-labs/centaur-overlay
-    tag: sha-3cc53da
-    pullPolicy: IfNotPresent
-    sourcePath: /overlay
+# Required by apiRs when sandboxBackend=agent-k8s (default). Installs the
+# upstream agent-sandbox controller + CRDs as a subchart in its own namespace.
+agentSandbox:
+  enabled: true
 
+# Repo-cache for overlay sources (replaces the old image-mount pattern).
+# Pulls listed repos to /var/lib/centaur/repos on each node every
+# syncIntervalSeconds; init containers copy the right subdir into each sandbox
+# at startup. GitHub token is required because centaur-overlay is a private repo.
+repoCache:
+  enabled: true
+  githubToken:
+    existingSecretName: centaur-infra-env
+    secretKey: GITHUB_TOKEN
+
+# Ordered overlay sources. Replaces the old `overlay:` image mount pattern —
+# our skills + tools now live as a git repo that repo-cache syncs continuously.
+# Skill changes become a git push, not a docker buildx + image bump.
+overlays:
+  sources:
+    - repo: birch-hill-labs/centaur-overlay
+      ref: main
+
+# Sandbox (Claude Code harness container). Image name unchanged but added
+# harnessEngine knob.
 sandbox:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-agent
-    tag: sha-ac06cff
+    tag: sha-97dae99
     pullPolicy: IfNotPresent
   runtimeClassName: ""
-  # Pin Claude Code to Sonnet 4.6 instead of letting it default to Opus 4.7.
-  # Birch Hill's Anthropic tier rate-limits Opus 4.7 to 10k input tokens/min
-  # org-wide, which trips a 429 on almost every agent turn. Sonnet 4.6 has
-  # ~3-5x the rate budget on the same tier, is ~3x cheaper per token, and is
-  # plenty smart for Slack-mention work. Override on a per-turn basis if a
-  # specific question genuinely needs Opus.
-  #
-  # The wrapper reads CLAUDE_MODEL (see services/sandbox/claude-app-wrapper.py
-  # in the centaur fork) — NOT the Anthropic SDK's ANTHROPIC_MODEL — and
-  # passes it verbatim to `claude --model`. Accepts aliases ("sonnet", "opus",
-  # "haiku") or full IDs like "claude-sonnet-4-6".
+  # Default harness for warm sandboxes — replaces the old api.defaultHarness +
+  # WARM_POOL_HARNESS pair. Values: codex | amp | claudecode (one word, NOT
+  # "claude-code"). Per-session sandboxes still respect per-turn --claude
+  # overrides.
+  harnessEngine: claudecode
+  # Pin Claude Code to Sonnet 4.6 (Birch Hill's Anthropic tier rate-limits
+  # Opus 4.7 to 10k input tokens/min org-wide → ~every turn 429s). Sonnet 4.6
+  # has 3-5× the rate budget on the same tier, is ~3× cheaper per token, and is
+  # plenty smart for Slack-mention work. claude-app-wrapper.py reads CLAUDE_MODEL
+  # (NOT Anthropic SDK's ANTHROPIC_MODEL).
   extraEnv:
     CLAUDE_MODEL: claude-sonnet-4-6
 
-slackbot:
+# Slackbot v2 (TypeScript / Chat SDK, replaces Python slackbot)
+slackbotv2:
   enabled: true
   image:
-    repository: ghcr.io/birch-hill-labs/centaur-slackbot
-    tag: sha-ac06cff
+    repository: ghcr.io/birch-hill-labs/centaur-slackbotv2
+    tag: sha-97dae99
     pullPolicy: IfNotPresent
+
+# Disabled — Rails web UI (formerly "ironControl"). Not needed yet; revisit
+# when we want authenticated browser access to the control plane.
+console:
+  enabled: false
+
+# Disabled — we use Slack, not Discord.
+discordbot:
+  enabled: false
 
 ironProxy:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-iron-proxy
-    tag: sha-ac06cff
+    tag: sha-97dae99
     pullPolicy: IfNotPresent
   # Production uses 1Password Connect (in-cluster Connect server, no SA rate limits).
   secretSource: onepassword-connect
@@ -97,17 +116,16 @@ postgres:
   persistence:
     enabled: true
     size: 20Gi
-    # DOKS default StorageClass — provisions DO Block Storage volumes (ext4).
     storageClassName: do-block-storage
     # Mount the PVC at /var/lib/postgresql/data/data instead of /var/lib/postgresql/data
-    # so Postgres initdb doesn't trip over ext4's lost+found dir. The subPath
-    # chart knob landed upstream as paradigmxyz/centaur#163.
+    # so Postgres initdb doesn't trip over ext4's lost+found dir. Chart knob
+    # from paradigmxyz/centaur#163.
     subPath: data
 
 # Public HTTPS ingress for the slackbot (Slack event URL terminates here).
-# cert-manager + ingress-nginx are installed as platform services (separate from this chart).
-# Chart's ingress template takes a single host string (not a hosts list) and hardcodes
-# path "/" to the slackbot service on port 3001.
+# cert-manager + ingress-nginx are installed as platform services (separate
+# from this chart). Chart's ingress template takes a single host string and
+# routes "/" to the slackbot service on port 3001.
 ingress:
   enabled: true
   className: nginx
@@ -116,9 +134,8 @@ ingress:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: "5m"
     # nginx-ingress applies HTTP→HTTPS redirect per host when any ingress for
-    # that host has TLS. That breaks Let's Encrypt's HTTP-01 challenge GET. Slack
-    # only ever calls the HTTPS URL anyway, so we lose nothing by disabling the
-    # redirect here.
+    # that host has TLS. Breaks Let's Encrypt HTTP-01 challenge GET. Slack
+    # only ever calls HTTPS anyway.
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   tls:
     - hosts:
@@ -127,12 +144,9 @@ ingress:
 
 networkPolicy:
   enabled: true
-  # Allow our ingress controller (deployed in the `ingress-nginx` namespace via
-  # the ingress-nginx helm chart) to reach the slackbot and api pods. The chart
-  # default only allows `kube-system`, which is where Docker Desktop / kind put
-  # their bundled ingresses but NOT where the standard ingress-nginx chart
-  # installs. Without this, NetworkPolicy drops nginx→pod traffic and every
-  # request 504s, including Let's Encrypt's HTTP-01 challenge.
+  # Allow our ingress controller (deployed in `ingress-nginx` namespace via the
+  # ingress-nginx helm chart) to reach the slackbot and api pods. Chart default
+  # only allows `kube-system`; standard ingress-nginx lives in its own ns.
   ingressControllerNamespaces:
     - kube-system
     - ingress-nginx
