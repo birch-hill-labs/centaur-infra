@@ -88,10 +88,25 @@ slackbotv2:
     tag: sha-97dae99
     pullPolicy: IfNotPresent
 
-# Disabled — Rails web UI (formerly "ironControl"). Not needed yet; revisit
-# when we want authenticated browser access to the control plane.
+# Rails control plane (formerly "ironControl"). REQUIRED — api-rs has a hard
+# dependency on iron-control whenever iron-proxy is configured. Mode `auto` in
+# apiRs.ironProxy reads false-y for that gating; the Rust source rejects any
+# config where iron_proxy is Some and iron_control is None (see
+# services/api-rs/crates/centaur-api-server/src/args.rs:1228). With the chart
+# unconditionally setting CA secret names, iron_proxy is always Some, so
+# console MUST be deployed.
+#
+# Bootstrap secrets (DATABASE_URL, INITIAL_USER_EMAIL/PASSWORD, INITIAL_API_KEY,
+# 3 ActiveRecord encryption keys, SECRET_KEY_BASE) are patched into the
+# centaur-infra-env Secret via kubectl. Initial admin email is cf@birchhill.io;
+# password + API key + encryption keys saved to
+# ~/.bh-centaur-console-secrets-2026-06-16.txt locally (file mode 600 —
+# rotate into 1P after first login).
+#
+# The chart's create-db init container idempotently provisions the
+# iron_control_production logical DB on the bundled Postgres.
 console:
-  enabled: false
+  enabled: true
 
 # Disabled — we use Slack, not Discord.
 discordbot:
