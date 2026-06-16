@@ -25,6 +25,15 @@ apiRs:
   sandboxWarmPoolSize: 3
   sandboxIdleStopTtlSecs: 10800
   sandboxMaxLifetimeSecs: 259200
+  # iron-proxy mode: enabled requires iron-control (the `console` Rails service)
+  # to manage secret registration. `auto` falls back to the static iron-proxy
+  # config rendered from chart values when iron-control isn't present — which
+  # is what we want since console.enabled=false. Without this, api-rs
+  # crashloops with "iron-proxy requires iron-control: set IRON_CONTROL_URL
+  # and IRON_CONTROL_API_KEY". See services/api-rs/crates/centaur-api-server/
+  # src/args.rs:1662 (IronProxyMode enum: Auto, Enabled, Disabled).
+  ironProxy:
+    mode: auto
   extraEnv: {}
 
 # Required by apiRs when sandboxBackend=agent-k8s (default). Installs the
