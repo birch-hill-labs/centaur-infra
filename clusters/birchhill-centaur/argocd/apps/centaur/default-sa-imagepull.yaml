@@ -1,0 +1,18 @@
+# Patches the default ServiceAccount in centaur-system with our GHCR pull
+# secret. The agents.x-k8s.io Sandbox controller spawns per-session asbx-*
+# pods bound to `default` (the namespace SA, not a chart-managed SA), so
+# without this every sandbox-proxy pod fails to pull centaur-iron-proxy with
+# 401 Unauthorized and Sandbox CRD reconciliation times out.
+#
+# Codified 2026-06-17 after the apiRs migration; was previously a one-shot
+# `kubectl patch` that wouldn't survive a cluster rebuild.
+#
+# Argo uses server-side-apply, so this coexists with whatever fields the
+# k8s SA controller manages — we only own `imagePullSecrets`.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: default
+  namespace: centaur-system
+imagePullSecrets:
+  - name: ghcr-pull-secret
