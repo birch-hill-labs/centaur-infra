@@ -107,6 +107,10 @@ slackbotv2:
 # iron_control_production logical DB on the bundled Postgres.
 console:
   enabled: true
+  image:
+    repository: ghcr.io/birch-hill-labs/centaur-console
+    tag: sha-97dae99
+    pullPolicy: IfNotPresent
 
 # Disabled — we use Slack, not Discord.
 discordbot:
