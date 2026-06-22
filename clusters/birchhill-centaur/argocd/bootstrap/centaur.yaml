@@ -16,7 +16,7 @@ spec:
     # below — no helm.parameters here. Bump the sha by updating both
     # targetRevision (here) and the tag fields in values.yaml in the same PR.
     - repoURL: https://github.com/birch-hill-labs/centaur.git
-      targetRevision: 97dae99f4ffea06c3f969dc30758d915272c90ff
+      targetRevision: d248d456133e4ce34766256c3f54420627bb563b
       path: contrib/chart
       helm:
         valueFiles:
