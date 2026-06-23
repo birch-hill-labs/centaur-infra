@@ -19,7 +19,7 @@ apiRs:
   enabled: true
   image:
     repository: ghcr.io/birch-hill-labs/centaur-api-rs
-    tag: sha-1fe0516
+    tag: sha-bc4a1e4
     pullPolicy: IfNotPresent
   sandboxBackend: agent-k8s    # uses agents.x-k8s.io Sandbox CRD
   sandboxWarmPoolSize: 3
@@ -64,7 +64,7 @@ overlays:
 sandbox:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-agent
-    tag: sha-1fe0516
+    tag: sha-bc4a1e4
     pullPolicy: IfNotPresent
   runtimeClassName: ""
   # Default harness for warm sandboxes — replaces the old api.defaultHarness +
@@ -85,7 +85,7 @@ slackbotv2:
   enabled: true
   image:
     repository: ghcr.io/birch-hill-labs/centaur-slackbotv2
-    tag: sha-1fe0516
+    tag: sha-bc4a1e4
     pullPolicy: IfNotPresent
 
 # Rails control plane (formerly "ironControl"). REQUIRED — api-rs has a hard
@@ -109,7 +109,7 @@ console:
   enabled: true
   image:
     repository: ghcr.io/birch-hill-labs/centaur-console
-    tag: sha-1fe0516
+    tag: sha-bc4a1e4
     pullPolicy: IfNotPresent
 
 # Disabled — we use Slack, not Discord.
@@ -119,7 +119,7 @@ discordbot:
 ironProxy:
   image:
     repository: ghcr.io/birch-hill-labs/centaur-iron-proxy
-    tag: sha-1fe0516
+    tag: sha-bc4a1e4
     pullPolicy: IfNotPresent
   # Production uses 1Password Connect (in-cluster Connect server, no SA rate limits).
   secretSource: onepassword-connect
