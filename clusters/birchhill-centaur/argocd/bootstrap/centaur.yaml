@@ -7,16 +7,16 @@ spec:
   project: default
   sources:
     # 1. Centaur Helm chart — pinned to a specific birch-hill-labs/centaur commit.
-    # Synced to paradigmxyz/centaur@main 2026-06-16 (major version migration to
-    # the Rust apiRs + slackbotv2 + agent-sandbox CRD architecture). Our fork
-    # carries one small CI workflow patch (publish-images.yml IMAGE_NAMESPACE
-    # pointed at our GHCR instead of upstream's).
+    # Synced to paradigmxyz/centaur@main 2026-06-23. Our fork carries CI workflow
+    # patches, re-applied on each sync: (1) publish-images.yml IMAGE_NAMESPACE ->
+    # our GHCR; (2) publish-images.yml de-Depot'd to GitHub-hosted runners
+    # (upstream moved CI to Depot, which we don't use) + a no-depot-guard workflow.
     #
     # All image tags + chart configuration live in the values.yaml referenced
     # below — no helm.parameters here. Bump the sha by updating both
     # targetRevision (here) and the tag fields in values.yaml in the same PR.
     - repoURL: https://github.com/birch-hill-labs/centaur.git
-      targetRevision: d248d456133e4ce34766256c3f54420627bb563b
+      targetRevision: bc4a1e4869bd511ec426a6a4a082049e6c9b430d
       path: contrib/chart
       helm:
         valueFiles:
